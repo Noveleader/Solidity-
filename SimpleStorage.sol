@@ -1,9 +1,10 @@
 //SPDX-License-Identifier: MIT
-pragma solidity ^0.8.7; //Defining solidity version
+pragma solidity ^0.8.0; //Defining solidity version
 
 //EVM - Ethereum Virtual Function
 //EVM compatible blockchains - Avalanche, Fantom, Polygon
 //Defining Contract
+import "./ExtraStorage.sol";
 contract SimpleStorage {
     // boolean, uint, int, address, bytes
     // bool hasFavouriteNumber = false; //it is going to represent true/false
@@ -24,7 +25,7 @@ contract SimpleStorage {
 
     // Creating a mapping or dictionary 
     mapping(string => uint256) public nameToFavoriteNumber;
-    function store(uint256 _favoriteNumber) public{
+    function store(uint256 _favoriteNumber) public virtual{
         favoriteNumber = _favoriteNumber;
         //anytime we are doing anything on blockchain it is a txn
         //we are deploying the contract
@@ -32,7 +33,7 @@ contract SimpleStorage {
         //Now the account will have a little less value as we had to pay gas for the two txn we did
         //first txn is smart contract running and other is storing value in function 
         //Every time we change the state of blockchain we are doing a txn
-        favoriteNumber = _favoriteNumber*10;
+        favoriteNumber = _favoriteNumber;
         retrieve(); //now this will cost gas as we are calling it within store which changes the state of blockchain
     }
     //view and pure function won't update anything on blockchain

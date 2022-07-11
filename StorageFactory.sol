@@ -3,14 +3,16 @@ pragma solidity ^0.8.0;
 //Smart contracts are composable since they can interact with each other easily
 
 //importing other contracts from the same directory
-import "./SimpleStorage.sol";
+//import "./SimpleStorage.sol";
+import "./ExtraStorage.sol";
 contract StorageFactory {
     //creating an array simpleStorageArray from the contract SimpleStorage
     SimpleStorage[] public simpleStorageArray;
     //address[] public simpleStorageArray; This will store the addresses directly and won't have the ABIs of the SimpleStorage Contract
     function createSimpleStorageContract() public {
         //creating a new instance of simple storage contract every time createSimpleStorageContract is deployed
-        SimpleStorage simpleStorage = new SimpleStorage();
+        //SimpleStorage simpleStorage = new SimpleStorage(); Makes a new instance of SimpleStorage contract 
+        SimpleStorage simpleStorage = new ExtraStorage(); //makes a new instance of ExtraStorage contract
         //pushing the contract instance into the array
         simpleStorageArray.push(simpleStorage);
     }
@@ -25,5 +27,5 @@ contract StorageFactory {
     function sfGet(uint256 _simpleStorageIndex) public view returns(uint256){
         return simpleStorageArray[_simpleStorageIndex].retrieve();
     }
-    
+
 }

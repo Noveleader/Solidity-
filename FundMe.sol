@@ -9,19 +9,32 @@ Set a minimum funcing
 pragma solidity ^0.8.0;
 
 import "./PriceConverter.sol"; //importing the library made in different file
+// Gas Cost = 822980 while doing it through VM
+// Transaction Cost = 803654 after using constant keyword for the variable
 
+error notOwner(); //Declared outside of contract and are custom errors and end up saving a lot of gas as we are not calling full string
 contract FundMe {
     using PriceConverter for uint256; //using library as a template for program 
-    uint256 public minimumUSD = 50*10**18;
+    uint256 public constant MINIMUM_USD = 50*10**18; 
+    /*
+    21393 while using constant = 21393*9000000000 = $0.02 
+    Here 9000000000 is the gas price of etherium in wei which gives answer in wei later converted to eth and USD
+    23493 while it isn't used = 23493*9000000000 = #0.03
+    */
     address[] public funders;
     uint256 public totalEth;
     mapping (address => uint256) public addressToAmountFunded;
 
-    address public owner;
-
+    address public immutable i_owner;
+    /*
+    Keyword immutable also have similar gas savings as constant 
+    A good practice is using i_ so that we know this variable is immutable
+    Transaction Cost before immutable = 803654
+    Transaction Cost after immutable = 780159
+    */
     constructor(){
         //called right away when the contract is deployed
-        owner = msg.sender;
+        i_owner = msg.sender;
     }
     function fund() public payable {
         /*
@@ -32,7 +45,7 @@ contract FundMe {
         Smart Contract addresses can also hold funds just like the wallets
         */
 
-        require(msg.value.getConversionRate() >= minimumUSD, "Didn't send enough eth"); // 1e18 = 1*10**18 This value is 1eth or number of weis present in eth
+        require(msg.value.getConversionRate() >= MINIMUM_USD, "Didn't send enough eth"); // 1e18 = 1*10**18 This value is 1eth or number of weis present in eth
 
         /*
         this msg.value is the first parameter of the function and in the bracket goes as a second parameter
@@ -92,7 +105,22 @@ contract FundMe {
     }
 
     modifier onlyOnwer {
-        require(msg.sender == owner, "Hey, you are not the owner of the contract");
+        // require(msg.sender == i_owner, "Hey, you are not the owner of the contract");
+        if(msg.sender != i_owner) {
+            revert notOwner();
+        }
         _; //This helps to run the rest of the code in the function modifier is used
+    }
+
+    // What happens if someone sends this contract ETH without calling the fund function
+    // receive() It should be external payable and doesn't use the function keyword and don't have any arguments or return statement 
+    // fallback()
+
+    receive() external payable {
+        fund();
+    }
+
+    fallback() external payable {
+        fund();
     }
 }
